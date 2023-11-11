@@ -184,3 +184,27 @@ class GatewayService(object):
             serialized_data['order_details']
         )
         return result['id']
+
+    @http("GET", "/orders", expected_exceptions=OrderNotFound)
+    def list_orders(self, request, order_id):
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 10, type=int)
+        orders = self._list_orders(page, per_page)
+        return Response(
+            GetOrderSchema().dumps(order).data,
+            mimetype='application/json'
+        )
+
+    def _list_orders(self, page, per_page):
+        orders = self.orders_rpc.list_orders(page, per_page)
+        product_map = {prod['id']: prod for prod in self.products_rpc.list()}
+        image_root = config['PRODUCT_IMAGE_ROOT']
+        for order in orders:
+            for item in order['order_details']:
+                product_id = item['product_id']
+
+                item['product'] = product_map[product_id]
+                # Construct an image url.
+                item['image'] = '{}/{}.jpg'.format(image_root, product_id)
+
+        return orders

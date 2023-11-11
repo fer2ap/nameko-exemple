@@ -28,3 +28,11 @@ class OrderNotFound(Exception):
 @remote_error('products.exceptions.NotFound')
 class ProductNotFound(Exception):
     pass
+
+@remote_error('orders.exceptions.InvalidPage')
+class OrderInvalidPage(Exception):
+    pass
+
+@remote_error('products.exceptions.InvalidPageSize')
+class OrderInvalidPageSize(Exception):
+    pass
