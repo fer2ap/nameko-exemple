@@ -63,14 +63,18 @@ def test_decrement_stock(storage, create_product, redis_client):
     assert b'7' == product_two[b'in_stock']
     assert b'12' == product_three[b'in_stock']
 
-# def test_delete(storage, create_product, redis_client):
-#         FISRT_PRODUCT_ID = 'LZ 127'
-#         SECOND_PRODUCT_ID = 'FA 129'
-#         create_product(id=1, title=FISRT_PRODUCT_ID, in_stock=10)
-#         create_product(id=2, title=SECOND_PRODUCT_ID, in_stock=11)
+def test_delete_product_that_exists(storage, create_product, redis_client):
+        PRODUCT_ID = 'LZ127'
+        create_product(id=PRODUCT_ID, title='LZ 127', in_stock=10)
+        before_deletion = redis_client.hgetall('products:{}'.format(PRODUCT_ID))
+        assert before_deletion
+        storage.delete(PRODUCT_ID)
+        after_deletion = redis_client.hgetall('products:{}'.format(PRODUCT_ID))
+        assert not after_deletion
 
-#         first_product = storage.delete(FISRT_PRODUCT_ID)
-#         second_product = storage.delete(SECOND_PRODUCT_ID)
 
-#         assert not first_product
-#         assert not second_product
+def test_delete_product_that_doesnt_exist(storage, create_product, redis_client):
+        RANDOM_ID = 123456
+        storage.delete(RANDOM_ID)
+        after_deletion = redis_client.hgetall('products:{}'.format(RANDOM_ID))
+        assert not after_deletion
