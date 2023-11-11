@@ -191,7 +191,7 @@ class GatewayService(object):
         per_page = request.args.get('per_page', 10, type=int)
         orders = self._list_orders(page, per_page)
         return Response(
-            GetOrderSchema().dumps(order).data,
+            GetOrderSchema().dumps(orders).data,
             mimetype='application/json'
         )
 

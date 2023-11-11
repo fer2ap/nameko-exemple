@@ -65,3 +65,18 @@ ID=$(echo ${ORDER_ID} | jq '.id')
 # Test: Get Order back
 echo "=== Getting Order ==="
 curl -s "${STD_APP_URL}/orders/${ID}" | jq .
+
+# # Test: Create second Order
+# echo "=== Creating another Order ==="
+# ORDER_ID=$(
+#     curl -s -XPOST "${STD_APP_URL}/orders" \
+#     -H 'accept: application/json' \
+#     -H 'Content-Type: application/json' \
+#     -d '{"order_details": [{"product_id": "the_new_odyssey", "price": "999.99", "quantity": 2}]}' 
+# )
+# echo ${ORDER_ID}
+# ID=$(echo ${ORDER_ID} | jq '.id')
+
+# # Test: Get All orders back
+# echo "=== Getting All Order ==="
+# curl -s "${STD_APP_URL}/orders?page=0&per_page=10" | jq .

@@ -18,7 +18,6 @@ class OrdersService:
     @rpc
     def get_order(self, order_id):
         order = self.db.query(Order).get(order_id)
-
         if not order:
             raise NotFound('Order with id {} not found'.format(order_id))
 
