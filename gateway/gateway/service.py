@@ -77,7 +77,7 @@ class GatewayService(object):
     @http(
         "DELETE", "/products/<string:product_id>"
     )
-    def get_product(self, request, product_id):
+    def delete_product(self, request, product_id):
         """Delete any product associated with the `product_id`
         """
         product = self.products_rpc.delete(product_id)
