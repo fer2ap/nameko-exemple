@@ -3,6 +3,3 @@ class NotFound(Exception):
 
 class PreconditionFailed(Exception):
     pass
-
-# class InvalidPageSize(Exception):
-#     pass

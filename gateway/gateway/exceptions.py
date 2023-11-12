@@ -29,10 +29,6 @@ class OrderNotFound(Exception):
 class ProductNotFound(Exception):
     pass
 
-@remote_error('orders.exceptions.InvalidPage')
-class OrderInvalidPage(Exception):
-    pass
-
-@remote_error('products.exceptions.InvalidPageSize')
-class OrderInvalidPageSize(Exception):
+@remote_error('orders.exceptions.PreconditionFailed')
+class OrderPreconditionFailed(Exception):
     pass

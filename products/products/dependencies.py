@@ -41,8 +41,6 @@ class StorageWrapper:
         if not product:
             raise NotFound('Product ID {} does not exist'.format(product_id))
         else:
-            print("Products service:")
-            print(product)
             return self._from_hash(product)
 
     def list(self):

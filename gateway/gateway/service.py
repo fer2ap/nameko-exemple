@@ -7,7 +7,7 @@ from nameko.rpc import RpcProxy
 from werkzeug import Response
 
 from gateway.entrypoints import http
-from gateway.exceptions import OrderNotFound, ProductNotFound
+from gateway.exceptions import OrderNotFound, ProductNotFound, OrderPreconditionFailed
 from gateway.schemas import CreateOrderSchema, GetOrderSchema, ProductSchema
 
 
@@ -92,13 +92,8 @@ class GatewayService(object):
         # Note - this may raise a remote exception that has been mapped to
         # raise``OrderNotFound``
         order = self.orders_rpc.get_order(order_id)
-
         # Enhance order details with product and image details.
         self._enhance_order(order)
-
-        print("Gateway service - get order")
-        print(order)
-
         return order
 
     @http(
@@ -177,7 +172,7 @@ class GatewayService(object):
             status=204
         )
 
-    @http("GET", "/orders")
+    @http("GET", "/orders",  expected_exceptions=OrderPreconditionFailed)
     def list_orders(self, request):
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 10, type=int)
@@ -189,35 +184,13 @@ class GatewayService(object):
 
     def _list_orders(self, page, per_page):
         orders = self.orders_rpc.list_orders(page, per_page)
-        # Alert! This method is getting all entries on redis, this may cause problems
-        # Alert! Replace this line of code with another stratagy
-        # Exemple: From an order, get a list of product_id inside each order_detail
-        # Create a method that receives an array of keys        
-    
         for order in orders:
             self._enhance_order(order)
-
-        print("Gateway service - list orders - size {}", len(orders))
-        print(orders)
         return orders
 
     def _enhance_order(self, order):
-        # Alert! This method is getting all entries on redis, this may cause problems
-        # Alert! Replace this line of code with another stratagy
-        # Exemple: From an order, get a list of product_id inside each order_detail
-        # Create a method that receives an array of keys
-
-        # If this is intended, change bzt yml to delete entries
-
-        # Retrieve all products from the products service
-       
-        # product_map = {prod['id']: prod for prod in self.products_rpc.list()}
-        
-        # get the configured image root
         image_root = config['PRODUCT_IMAGE_ROOT']
-
         for item in order['order_details']:
             product_id = item['product_id']
             item['product'] = self.products_rpc.get(product_id)
-            # Construct an image url.
             item['image'] = '{}/{}.jpg'.format(image_root, product_id)
