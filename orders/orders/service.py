@@ -2,10 +2,10 @@ from nameko.events import EventDispatcher
 from nameko.rpc import rpc
 from nameko_sqlalchemy import DatabaseSession
 
-from orders.exceptions import NotFound
+from orders.exceptions import NotFound, PreconditionFailed
 from orders.models import DeclarativeBase, Order, OrderDetail
 from orders.schemas import OrderSchema
-
+from orders.constants import *
 
 class OrdersService:
     name = 'orders'
@@ -70,10 +70,10 @@ class OrdersService:
 
     @rpc
     def list_orders(self, page, per_page):
-        if page < 1:
-            raise PreconditionFailed('Invalid page {}. Parameter page must be equal or grater than 1'.format(page))
-        if per_page < 1:
-            raise PreconditionFailed('Invalid page size {}.Parameter per_page must be equal or grater than 1'.format(per_page))
+        if page < LOWER_LIMIT_PAGE:
+            raise PreconditionFailed(INVALID_PAGE_EXCEPTION_MESSAGE.format(page=page))
+        if per_page < LOWER_LIMIT_PER_PAGE:
+            raise PreconditionFailed(INVALID_PER_PAGE_EXCEPTION_MESSAGE.format(per_page=per_page))
 
         offset = (page - 1) * per_page
         orders = self.db.query(Order).limit(per_page).offset(offset).all()
