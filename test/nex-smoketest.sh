@@ -29,7 +29,7 @@ echo STD_APP_URL=${STD_APP_URL}
 
 # Test: Create Products
 echo "=== Creating a product id: the_odyssey ==="
-curl -s -X POST  "${STD_APP_URL}/products" \
+curl -s -XPOST  "${STD_APP_URL}/products" \
     -H 'accept: application/json' \
     -H 'Content-Type: application/json' \
     -d '{"id": "the_odyssey", "title": "The Odyssey", "passenger_capacity": 101, "maximum_speed": 5, "in_stock": 10}'
@@ -37,8 +37,8 @@ echo
 # Test: Get Product
 echo "=== Getting product id: the_odyssey ==="
 curl -s "${STD_APP_URL}/products/the_odyssey" | jq .
-echo
 
+echo
 # Test: Delete Product
 echo "=== Deleting product id: the_odyssey ==="
 curl -s  -X DELETE  "${STD_APP_URL}/products/the_odyssey" | jq .
@@ -51,6 +51,13 @@ echo "=== Getting deleted product id: the_odyssey ==="
 curl -s "${STD_APP_URL}/products/the_odyssey" | jq .
 echo 
 
+# Test: Recreate Product
+echo "=== Recreating a product id: the_odyssey ==="
+curl -s -XPOST  "${STD_APP_URL}/products" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{"id": "the_odyssey", "title": "The Odyssey", "passenger_capacity": 101, "maximum_speed": 5, "in_stock": 10}'
+echo
 # Test: Create Order
 echo "=== Creating Order ==="
 ORDER_ID=$(
@@ -66,17 +73,6 @@ ID=$(echo ${ORDER_ID} | jq '.id')
 echo "=== Getting Order ==="
 curl -s "${STD_APP_URL}/orders/${ID}" | jq .
 
-# # Test: Create second Order
-# echo "=== Creating another Order ==="
-# ORDER_ID=$(
-#     curl -s -XPOST "${STD_APP_URL}/orders" \
-#     -H 'accept: application/json' \
-#     -H 'Content-Type: application/json' \
-#     -d '{"order_details": [{"product_id": "the_new_odyssey", "price": "999.99", "quantity": 2}]}' 
-# )
-# echo ${ORDER_ID}
-# ID=$(echo ${ORDER_ID} | jq '.id')
-
-# # Test: Get All orders back
-# echo "=== Getting All Order ==="
-# curl -s "${STD_APP_URL}/orders?page=0&per_page=10" | jq .
+# Test: Get All orders back
+echo "=== Getting all Orders ==="
+curl -s "${STD_APP_URL}/orders?page=1&per_page=10" | jq .

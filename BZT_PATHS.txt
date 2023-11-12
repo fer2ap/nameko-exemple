@@ -1,0 +1,5 @@
+Recovering products with list
+https://a.blazemeter.com/app/?public-token=1zkiXcF2zgZl5NCR80S2Ilvj523JsiV6tnMfZUyKf4AvD6lh6B#/accounts/-1/workspaces/-1/projects/-1/sessions/r-ext-6550272d596be306546252/summary/monitoring
+
+Recovering products with get
+https://a.blazemeter.com/app/?public-token=UYu3qDPqkdycMc6uzGwRMLYy8ZWpPg5StlqeCiEgGULRwzk8ZS#/accounts/-1/workspaces/-1/projects/-1/sessions/r-ext-6550295503bb9161148423/summary

@@ -41,10 +41,12 @@ class StorageWrapper:
         if not product:
             raise NotFound('Product ID {} does not exist'.format(product_id))
         else:
+            print("Products service:")
             print(product)
             return self._from_hash(product)
 
     def list(self):
+        # this method is getting all entries on redis, this may cause problems
         keys = self.client.keys(self._format_key('*'))
         for key in keys:
             yield self._from_hash(self.client.hgetall(key))

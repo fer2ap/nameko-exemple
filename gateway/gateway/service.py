@@ -73,18 +73,6 @@ class GatewayService(object):
         return Response(
             json.dumps({'id': product_data['id']}), mimetype='application/json'
         )
-    
-    @http(
-        "DELETE", "/products/<string:product_id>"
-    )
-    def delete_product(self, request, product_id):
-        """Delete any product associated with the `product_id`
-        """
-        product = self.products_rpc.delete(product_id)
-        return Response(
-            "No content",
-            status=204
-        )
 
     @http("GET", "/orders/<int:order_id>", expected_exceptions=OrderNotFound)
     def get_order(self, request, order_id):
@@ -105,19 +93,11 @@ class GatewayService(object):
         # raise``OrderNotFound``
         order = self.orders_rpc.get_order(order_id)
 
-        # Retrieve all products from the products service
-        product_map = {prod['id']: prod for prod in self.products_rpc.list()}
-
-        # get the configured image root
-        image_root = config['PRODUCT_IMAGE_ROOT']
-
         # Enhance order details with product and image details.
-        for item in order['order_details']:
-            product_id = item['product_id']
+        self._enhance_order(order)
 
-            item['product'] = product_map[product_id]
-            # Construct an image url.
-            item['image'] = '{}/{}.jpg'.format(image_root, product_id)
+        print("Gateway service - get order")
+        print(order)
 
         return order
 
@@ -184,27 +164,60 @@ class GatewayService(object):
             serialized_data['order_details']
         )
         return result['id']
+    
+    @http(
+    "DELETE", "/products/<string:product_id>"
+    )
+    def delete_product(self, request, product_id):
+        """Delete any product associated with the `product_id`
+        """
+        product = self.products_rpc.delete(product_id)
+        return Response(
+            "No content",
+            status=204
+        )
 
-    @http("GET", "/orders", expected_exceptions=OrderNotFound)
-    def list_orders(self, request, order_id):
+    @http("GET", "/orders")
+    def list_orders(self, request):
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 10, type=int)
         orders = self._list_orders(page, per_page)
         return Response(
-            GetOrderSchema().dumps(orders).data,
+            GetOrderSchema(many = True).dumps(orders).data,
             mimetype='application/json'
         )
 
     def _list_orders(self, page, per_page):
         orders = self.orders_rpc.list_orders(page, per_page)
-        product_map = {prod['id']: prod for prod in self.products_rpc.list()}
-        image_root = config['PRODUCT_IMAGE_ROOT']
+        # Alert! This method is getting all entries on redis, this may cause problems
+        # Alert! Replace this line of code with another stratagy
+        # Exemple: From an order, get a list of product_id inside each order_detail
+        # Create a method that receives an array of keys        
+    
         for order in orders:
-            for item in order['order_details']:
-                product_id = item['product_id']
+            self._enhance_order(order)
 
-                item['product'] = product_map[product_id]
-                # Construct an image url.
-                item['image'] = '{}/{}.jpg'.format(image_root, product_id)
-
+        print("Gateway service - list orders - size {}", len(orders))
+        print(orders)
         return orders
+
+    def _enhance_order(self, order):
+        # Alert! This method is getting all entries on redis, this may cause problems
+        # Alert! Replace this line of code with another stratagy
+        # Exemple: From an order, get a list of product_id inside each order_detail
+        # Create a method that receives an array of keys
+
+        # If this is intended, change bzt yml to delete entries
+
+        # Retrieve all products from the products service
+       
+        # product_map = {prod['id']: prod for prod in self.products_rpc.list()}
+        
+        # get the configured image root
+        image_root = config['PRODUCT_IMAGE_ROOT']
+
+        for item in order['order_details']:
+            product_id = item['product_id']
+            item['product'] = self.products_rpc.get(product_id)
+            # Construct an image url.
+            item['image'] = '{}/{}.jpg'.format(image_root, product_id)

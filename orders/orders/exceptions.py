@@ -1,8 +1,8 @@
 class NotFound(Exception):
     pass
 
-class InvalidPage(Exception):
+class PreconditionFailed(Exception):
     pass
 
-class InvalidPageSize(Exception):
-    pass
+# class InvalidPageSize(Exception):
+#     pass
