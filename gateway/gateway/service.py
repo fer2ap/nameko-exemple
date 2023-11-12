@@ -92,7 +92,7 @@ class GatewayService(object):
         # Note - this may raise a remote exception that has been mapped to
         # raise``OrderNotFound``
         order = self.orders_rpc.get_order(order_id)
-
+        print("no enhance")
         # get the configured image root
         image_root = config['PRODUCT_IMAGE_ROOT']
 
@@ -155,18 +155,25 @@ class GatewayService(object):
 
     def _create_order(self, order_data):
         # check order product ids are valid
-        valid_product_ids = {prod['id'] for prod in self.products_rpc.list()}
         for item in order_data['order_details']:
-            if item['product_id'] not in valid_product_ids:
+            try:
+                product_id = item['product_id']
+                # Retrieve one product from the products service
+                product = self.products_rpc.get(product_id)
+                if not product:
+                    raise ProductNotFound(
+                        "Product Id {}".format(item['product_id'])
+                    )
+                # Call orders-service to create the order.
+                # Dump the data through the schema to ensure the values are serialized
+                # correctly.
+                serialized_data = CreateOrderSchema().dump(order_data).data
+                result = self.orders_rpc.create_order(
+                    serialized_data['order_details']
+                )
+                return result['id']
+            except:
                 raise ProductNotFound(
                     "Product Id {}".format(item['product_id'])
                 )
 
-        # Call orders-service to create the order.
-        # Dump the data through the schema to ensure the values are serialized
-        # correctly.
-        serialized_data = CreateOrderSchema().dump(order_data).data
-        result = self.orders_rpc.create_order(
-            serialized_data['order_details']
-        )
-        return result['id']
