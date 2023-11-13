@@ -1,11 +1,12 @@
 import pytest
-
 from mock import call
 from nameko.exceptions import RemoteError
 
+
 from orders.models import Order, OrderDetail
 from orders.schemas import OrderSchema, OrderDetailSchema
-
+from orders.test_constants import INVALID_PER_PAGE, VALID_PER_PAGE, INVALID_PAGE, VALID_PAGE
+from orders.constants import INVALID_PAGE_EXCEPTION_MESSAGE, INVALID_PER_PAGE_EXCEPTION_MESSAGE
 
 @pytest.fixture
 def order(db_session):
@@ -94,3 +95,17 @@ def test_can_update_order(orders_rpc, order):
 def test_can_delete_order(orders_rpc, order, db_session):
     orders_rpc.delete_order(order.id)
     assert not db_session.query(Order).filter_by(id=order.id).count()
+
+def test_can_list_orders(orders_rpc, order):
+    orders = orders_rpc.list_orders(VALID_PAGE, VALID_PER_PAGE)
+    assert orders[0]['id'] == order.id
+
+def test_per_page_param_validation(orders_rpc):
+    with pytest.raises(RemoteError) as exception:
+        orders_rpc.list_orders(VALID_PAGE, INVALID_PER_PAGE)
+    assert INVALID_PER_PAGE_EXCEPTION_MESSAGE.format(per_page=INVALID_PER_PAGE) in str(exception.value)
+    
+def test_page_param_validation(orders_rpc):
+    with pytest.raises(RemoteError) as exception:
+        orders_rpc.list_orders(INVALID_PAGE, VALID_PER_PAGE)
+    assert INVALID_PAGE_EXCEPTION_MESSAGE.format(page=INVALID_PAGE) in str(exception.value)

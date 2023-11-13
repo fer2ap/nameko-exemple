@@ -64,7 +64,53 @@ scenarios:
         product_key: $.id
         default: NOT_FOUND
 
-    # 3. Create Orders
+    - if: '"${product_id}" == "NOT_FOUND"'
+      then:
+        - action: continue
+
+    # 3. Delete Product
+    - url: /products/${product_id}
+      label: product-get
+      think-time: uniform(0s, 0s)
+      method: DELETE
+        
+      assert:
+      - contains:
+        - 204
+        subject: http-code
+        not: false
+
+     # 4. Recreate Product
+    - url: /products
+      label: products-create
+      think-time: uniform(0s, 0s)
+      method: POST
+      headers:
+        cache-control: no-cache
+        Content-Type: application/json
+      body: 'request-body-string'
+      body: >
+        {
+          "id": "${id}-${__javaScript(Math.random())}",
+          "title": "${title}",
+          "passenger_capacity": ${passenger_capacity},
+          "maximum_speed": ${maximum_speed},
+          "in_stock": ${in_stock}
+        }          
+      assert:
+      - contains:
+        - 200
+        subject: http-code
+        not: false
+      extract-jsonpath:
+        product_id: $.id
+        default: NOT_FOUND
+
+    - if: '"${product_id}" == "NOT_FOUND"'
+      then:
+        - action: continue
+
+    # 5. Create Orders
     - url: /orders
       label: orders-create
       think-time: uniform(0s, 0s)
@@ -90,7 +136,7 @@ scenarios:
       then:
         - action: continue
   
-    # 4. Get Orders
+    # 6. Get Orders
     - url: /orders/${order_id}
       label: order-get
       think-time: uniform(0s, 0s)
@@ -109,6 +155,18 @@ scenarios:
       then:
         - action: continue
   
+     # 7. List Orders
+    - url: /orders?page=1&per_page=3
+      label: order-list
+      think-time: uniform(0s, 0s)
+      method: GET
+        
+      assert:
+      - contains:
+        - 200
+        subject: http-code
+        not: false
+
 reporting:
 - module: final-stats
   dump-xml: stats.xml

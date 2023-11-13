@@ -44,6 +44,7 @@ class StorageWrapper:
             return self._from_hash(product)
 
     def list(self):
+        # this method is getting all entries on redis, this may cause problems
         keys = self.client.keys(self._format_key('*'))
         for key in keys:
             yield self._from_hash(self.client.hgetall(key))
@@ -57,6 +58,8 @@ class StorageWrapper:
         return self.client.hincrby(
             self._format_key(product_id), 'in_stock', -amount)
 
+    def delete(self, product_id):
+        self.client.delete(self._format_key(product_id))
 
 class Storage(DependencyProvider):
 

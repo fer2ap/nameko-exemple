@@ -41,7 +41,7 @@ fi
 
 DATA_SRC=./test/nex-users.csv
 
-echo "Starting with ${NO_USERS} user(s) in ${RAMP_UP} min, will run for ${HOLD} hours"
+echo "Starting with ${NO_USERS} user(s) in ${RAMP_UP}, will run for ${HOLD}"
 bzt -report -o scenarios.nex.default-address=${STD_APP_URL} \
     -o scenarios.nex.variables.apigee_client_id=client_id \
     -o scenarios.nex.variables.apigee_client_secret=client_secret \
